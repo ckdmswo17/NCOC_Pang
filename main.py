@@ -64,6 +64,7 @@ ball_speed_y = [-18, -15, -12, -9] # index 0, 1, 2, 3 에 해당하는 값
 balls = []
 
 # 최초 발생하는 큰 공 추가
+ball_count = 0
 balls.append({
     "pos_x" : 50, # 공의 x 좌표
     "pos_y" : 50, # 공의 y 좌표
@@ -78,7 +79,7 @@ ball_to_remove = -1
 
 # Font 정의
 game_font = pygame.font.Font(None, 40)
-total_time = 25
+total_time = 30
 start_ticks = pygame.time.get_ticks() # 시작 시간 정의
 
 # 게임 종료 메시지 
@@ -241,9 +242,10 @@ while running:
         weapon_to_remove = -1
 
     # 모든 공을 없앤 경우 게임 종료 (성공)
-    if len(balls) == 0:
-        game_result = "Mission Complete"
-        running = False
+    # if len(balls) == 0:
+    #     nonlocal elapsed_time
+    #     game_result = "Mission Complete"
+    #     running = True
 
     # 5. 화면에 그리기
     screen.blit(background, (0, 0))
@@ -262,18 +264,23 @@ while running:
     
     # 경과 시간 계산
     elapsed_time = (pygame.time.get_ticks() - start_ticks) / 1000 # ms -> s
-    timer = game_font.render("Time : {}".format(int(total_time - elapsed_time)), True, (0, 0, 255))
+    timer = game_font.render("Time : {}".format(int(elapsed_time)), True, (0, 0, 255))
     screen.blit(timer, (10, 10)) # 파란색
 
-    # 시간 초과했다면
-    if total_time - elapsed_time <= 0:
-        game_result = "Time Over"
-        running = False
-
+    # 10초 단위로 공 추가
+    if elapsed_time % 10 < 0.035:
+      ball_count += 1
+      balls.append({
+        "pos_x" : 50, # 공의 x 좌표
+        "pos_y" : 50, # 공의 y 좌표
+        "img_idx" : 0, # 공의 이미지 인덱스
+        "to_x": 3, # x축 이동방향, -3 이면 왼쪽으로, 3 이면 오른쪽으로
+        "to_y": -6, # y축 이동방향,
+        "init_spd_y": ball_speed_y[0]})
     pygame.display.update()
 
 # 게임 오버 메시지
-msg = game_font.render(game_result, True, (255, 0, 0)) # 빨간색
+msg = game_font.render(game_result + "!! Your Survive Time : " +str(elapsed_time)+"s", True, (255, 0, 0)) # 빨간색
 msg_rect = msg.get_rect(center=(int(screen_width / 2), int(screen_height / 2)))
 screen.blit(msg, msg_rect)
 pygame.display.update()
